@@ -3,12 +3,18 @@
 __metaclass__ = type
 
 ## Standard Libraries
+import sys
 import argparse
 import logging
+from io import BytesIO
 from pprint import pprint#, pformat
 
 ## Third Party libraries
 import pkg_resources
+import barcode
+from barcode import Code128
+from barcode.writer import ImageWriter
+from PIL import Image
 
 ## Modules
 # N/A
@@ -23,8 +29,10 @@ try:
     _distro = pkg_resources.get_distribution(__package_name__)
     __code_version__ = _distro.version
     __code_meta__ = vars(_distro)
+    __code_debug__ = False
 except pkg_resources.DistributionNotFound:
     # when debugging with vscode
+    __code_debug__ = True
     stubs = [ '__code_version__', '__code_meta__']
     for s in stubs:
         globals()[s] = 'Not Available'
@@ -41,7 +49,7 @@ def __print_dunders__():
             else:
                 pprint("%s => %s" % (k, v))
 
-def init_logging():
+def begin_logging():
     handler = logging.StreamHandler()
     handler.setFormatter(
         logging.Formatter(
@@ -49,7 +57,7 @@ def init_logging():
             fmt="[{name}:{filename}] {levelname} - {message}"
         )
     )
-    log = logging.getLogger("genbarcode")
+    log = logging.getLogger(__package_name__)
     log.setLevel(logging.INFO)
     log.addHandler(handler)
 
@@ -58,18 +66,38 @@ def collect_args():
         formatter_class=argparse.RawTextHelpFormatter)
     parser.add_argument('-V', '--version', action='version', version=__code_version__)
     parser.add_argument('-v', '--verbose', action='count', default=0)
-    parser.parse_args()
-    args = parser.parse_args
+    parser.add_argument('-l', '--list-methods', action='store_true',
+        help="Enumerate available generators and exit")
+    parser.add_argument('-m', '--method', default='Code128',
+        help="set the barcode generated type (default: %(default)s)")
+    parser.add_argument('-d', '--data', help="Provide data to be used to generate the barcode")
+    parser.add_argument('-t', '--tracking',
+        help="Provide tracking number to be used to generate the barcode, stub for --data")
+    args = parser.parse_args()
     return parser, args
 
 def handle_args():
     parser, args = collect_args()
+    methods = barcode.PROVIDED_BARCODES
+
+    if args.list_methods:
+        pprint(methods)
+        sys.exit(0)
+
+    if args.method:
+        if args.method not in methods:
+            raise AssertionError("%s not in acceptable methods (%s)" % (args.method, methods))
+
+    if args.data is None and args.tracking is None:
+        parser.print_help()
+        sys.exit(0)
+    else:
+        args.data = args.data or args.tracking
     return args
 
 def main():
-    demo()
-    init_logging()
-    handle_args()
+    begin_logging()
+    args = handle_args()
     return
 
 if __name__=="__main__":
