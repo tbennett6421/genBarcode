@@ -17,9 +17,9 @@ import pkg_resources
 try:
     __package_name__ = 'genbarcode'
     __code_name__  = __package_name__
-    __code_desc__ = """ program description to be displayed by argparse
-    ex: python {name}
-""".format(name=str(__package_name__)+'.py')
+    # spacing is deliberate
+    __code_desc__ = """ program description to be displayed by argparse \n    ex: python {name}
+        """.format(name=str(__package_name__)+'.py')
     _distro = pkg_resources.get_distribution(__package_name__)
     __code_version__ = _distro.version
     __code_meta__ = vars(_distro)
