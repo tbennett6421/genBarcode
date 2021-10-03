@@ -15,7 +15,7 @@ import pkg_resources
 
 ## Load up some metadata
 try:
-    __package_name__ = 'genbarcode'
+    __package_name__ = 'genBarcode'
     __code_name__  = __package_name__
     # spacing is deliberate
     __code_desc__ = """ program description to be displayed by argparse \n    ex: python {name}

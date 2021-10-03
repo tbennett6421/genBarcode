@@ -1,5 +1,5 @@
 [tool.poetry]
-name = "genbarcode"
+name = "genBarcode"
 version = "v0.0.1"
 description = "offline tracking number image rendering tool."
 authors = ["Tyler Bennett <tbennett6421@gmail.com>"]
@@ -15,11 +15,11 @@ classifiers = [
 ]
 
 packages = [
-    { include = "genbarcode"}
+    { include = "genBarcode"}
 ]
 
 [tool.poetry.scripts]
-genbarcode = 'genbarcode.__main__:main'
+genBarcode = 'genBarcode.__main__:main'
 
 [tool.poetry.dependencies]
 python = "^3.8.0"
