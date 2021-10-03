@@ -23,6 +23,7 @@ genbarcode = 'genbarcode.__main__:main'
 
 [tool.poetry.dependencies]
 python = "^3.8.0"
+python-barcode = {extras = ["images"], version = "^0.13.1"}
 
 [tool.poetry.dev-dependencies]
 pytest = "*"
