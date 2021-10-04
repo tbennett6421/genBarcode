@@ -47,10 +47,6 @@ except pkg_resources.DistributionNotFound:
     for s in stubs:
         globals()[s] = 'Not Available'
 
-def demo():
-    __print_dunders__()
-    sys.exit(ReturnCodes.EXIT_DEMO)
-
 def __print_dunders__():
     blacklist = ['__builtins__', '__print_dunders__']
     for k, v in list(globals().items()):
@@ -106,6 +102,10 @@ def handle_args():
         args.data = args.data or args.tracking
     return args
 
+def demo():
+    __print_dunders__()
+    sys.exit(ReturnCodes.EXIT_DEMO)
+
 def main():
     begin_logging()
     args = handle_args()
@@ -121,7 +121,8 @@ def main():
             else:
                 raise CustomExceptions.NoImageViewerAvailable
         except CustomExceptions.NoImageViewerAvailable:
-            pass
+            # will revisit
+            raise NotImplementedError from CustomExceptions.NoImageViewerAvailable
 
 if __name__=="__main__":
     main()
