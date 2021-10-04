@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "genBarcode"
-version = "v0.0.1"
+version = "v1.0.0"
 description = "offline tracking number image rendering tool."
 authors = ["Tyler Bennett <tbennett6421@gmail.com>"]
 readme = "README.md"
