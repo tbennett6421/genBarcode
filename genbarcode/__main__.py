@@ -1,8 +1,10 @@
 #pylint: disable=missing-module-docstring
 #from __future__ import (print_function, unicode_literals, division, absolute_import)
 __metaclass__ = type
+__package_name__ = 'genBarcode'
 
 ## Standard Libraries
+import os
 import sys
 import argparse
 import logging
@@ -12,16 +14,24 @@ from pprint import pprint#, pformat
 ## Third Party libraries
 import pkg_resources
 import barcode
-from barcode import Code128
 from barcode.writer import ImageWriter
-from PIL import Image
+from PIL import Image, ImageShow
 
 ## Modules
-# N/A
+try:
+    from .classes import ReturnCodes
+    from .classes import CustomExceptions
+except ImportError:
+    # If we can't import modules, probably running from VSCODE
+    # attempt to hack in modules
+    import importlib
+    SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
+    sys.path.append(os.path.dirname(SCRIPT_DIR))
+    ReturnCodes = importlib.import_module(__package_name__+'.classes.ReturnCodes')
+    CustomExceptions = importlib.import_module(__package_name__+'.classes.CustomExceptions')
 
 ## Load up some metadata
 try:
-    __package_name__ = 'genBarcode'
     __code_name__  = __package_name__
     # spacing is deliberate
     __code_desc__ = """ program description to be displayed by argparse \n    ex: python {name}
@@ -39,6 +49,7 @@ except pkg_resources.DistributionNotFound:
 
 def demo():
     __print_dunders__()
+    sys.exit(ReturnCodes.EXIT_DEMO)
 
 def __print_dunders__():
     blacklist = ['__builtins__', '__print_dunders__']
@@ -68,7 +79,7 @@ def collect_args():
     parser.add_argument('-v', '--verbose', action='count', default=0)
     parser.add_argument('-l', '--list-methods', action='store_true',
         help="Enumerate available generators and exit")
-    parser.add_argument('-m', '--method', default='Code128',
+    parser.add_argument('-m', '--method', default='code128',
         help="set the barcode generated type (default: %(default)s)")
     parser.add_argument('-d', '--data', help="Provide data to be used to generate the barcode")
     parser.add_argument('-t', '--tracking',
@@ -90,7 +101,7 @@ def handle_args():
 
     if args.data is None and args.tracking is None:
         parser.print_help()
-        sys.exit(0)
+        sys.exit(ReturnCodes.EXIT_USAGE)
     else:
         args.data = args.data or args.tracking
     return args
@@ -98,7 +109,19 @@ def handle_args():
 def main():
     begin_logging()
     args = handle_args()
-    return
+
+    rv = BytesIO()
+    klass = barcode.get_barcode_class(args.method)
+    klass(str(args.data), writer=ImageWriter()).write(rv)
+    with Image.open(rv) as im:
+        try:
+            rcode = ImageShow.show(im)
+            if rcode:
+                return ReturnCodes.EXIT_SUCCESS
+            else:
+                raise CustomExceptions.NoImageViewerAvailable
+        except CustomExceptions.NoImageViewerAvailable:
+            pass
 
 if __name__=="__main__":
     main()
